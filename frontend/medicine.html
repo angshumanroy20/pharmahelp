@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medicine Search - PharmaHelp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-300 flex flex-col items-center py-10 px-2">
+  <h1 class="text-4xl font-extrabold text-blue-900 mb-8 drop-shadow text-center">Medicine Search</h1>
+  <div class="w-full max-w-lg mx-auto bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-blue-200 p-8 mb-8 flex flex-col items-center">
+    <div class="w-full flex flex-col sm:flex-row gap-4">
+      <input type="text" id="search" placeholder="Search medicine..." class="flex-1 px-4 py-3 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-base transition" />
+      <button onclick="searchMedicine()" class="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200">Search</button>
+    </div>
+  </div>
+  <div id="results" class="w-full max-w-2xl mx-auto"></div>
+
+  <script>
+    async function searchMedicine() {
+      const query = document.getElementById("search").value.trim();
+      const token = localStorage.getItem("token");
+
+      if (!query) {
+        document.getElementById("results").innerHTML = `<p class="text-center text-red-500 font-semibold">Please enter a search query.</p>`;
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          `http://localhost:5000/api/medicines/search?q=${encodeURIComponent(query)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!res.ok) {
+          const error = await res.json();
+          document.getElementById("results").innerHTML = `<p class="text-center text-red-500 font-semibold">Error: ${error.message || "Something went wrong"}</p>`;
+          return;
+        }
+
+        const data = await res.json();
+
+        if (data.length === 0) {
+          document.getElementById("results").innerHTML = `<p class="text-center text-gray-500 font-semibold">No medicines found.</p>`;
+          return;
+        }
+
+        const results = data
+          .map(
+            (med) => `
+              <div class="bg-white/90 border-l-4 border-blue-400 rounded-xl shadow-md p-6 mb-6">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="inline-block w-3 h-3 rounded-full bg-blue-400"></span>
+                  <strong class="text-lg text-blue-700">${med.name}</strong>
+                </div>
+                <div class="text-gray-700 mb-1"><span class="font-semibold">Usage:</span> ${med.usage}</div>
+                <div class="text-gray-700 mb-1"><span class="font-semibold">Stock:</span> ${med.stock}</div>
+                <div class="text-gray-700"><span class="font-semibold">Substitutes:</span> ${med.substitutes || "None"}</div>
+              </div>
+            `
+          )
+          .join("");
+
+        document.getElementById("results").innerHTML = results;
+      } catch (err) {
+        console.error("Search failed:", err);
+        document.getElementById("results").innerHTML = `<p class="text-center text-red-500 font-semibold">Error fetching data.</p>`;
+      }
+    }
+  </script>
+</body>
+</html>

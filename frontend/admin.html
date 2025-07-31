@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Admin Panel - PharmaHelp</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-300 py-10 px-4"
+  >
+    <h2
+      class="text-4xl font-extrabold text-blue-900 mb-8 drop-shadow text-center"
+    >
+      Admin Panel – Prescription Viewer
+    </h2>
+    <div
+      class="w-full max-w-5xl mx-auto bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-blue-200 p-8 mb-10 overflow-x-auto"
+    >
+      <table
+        id="admin-prescription"
+        class="w-full text-left rounded-xl overflow-hidden"
+      >
+        <thead>
+          <tr class="bg-blue-600 text-white">
+            <th class="py-3 px-4">Prescription ID</th>
+            <th class="py-3 px-4">Patient</th>
+            <th class="py-3 px-4">Doctor</th>
+            <th class="py-3 px-4">Date</th>
+            <th class="py-3 px-4">File</th>
+          </tr>
+        </thead>
+        <tbody
+          id="prescriptionList"
+          class="divide-y divide-blue-100 bg-white/60 backdrop-blur-sm"
+        ></tbody>
+      </table>
+    </div>
+    <div class="flex flex-wrap justify-center gap-4 mt-6">
+      <button
+        class="bg-red-500 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-all duration-200"
+        onclick="window.location.href='login.html'"
+      >
+        Back
+      </button>
+      <button
+        class="bg-green-500 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-all duration-200"
+        onclick="window.location.href='medicine_form.html'"
+      >
+        Medicine Management
+      </button>
+      <button
+        class="bg-blue-500 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-all duration-200"
+        onclick="window.location.href='dashboard.html'"
+      >
+        Dashboard
+      </button>
+      <!-- <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-all duration-200" onclick="window.location.href='side-effects.html'">Side-Effects Reports</button> -->
+    </div>
+    <script src="js/admin.js"></script>
+  </body>
+</html>

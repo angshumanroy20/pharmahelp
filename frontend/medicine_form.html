@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Medicine Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-300 flex flex-col items-center py-10 px-4"
+  >
+    <h2 class="text-3xl font-bold text-blue-900 mb-8 drop-shadow text-center">
+      Add or Update Medicine
+    </h2>
+    <form
+      id="medicineForm"
+      class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-blue-200 px-8 py-10 w-full max-w-xl flex flex-col mb-10"
+    >
+      <input
+        type="text"
+        id="name"
+        placeholder="Medicine Name"
+        required
+        class="mb-4 px-4 py-3 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-base transition"
+      />
+      <textarea
+        id="usage"
+        placeholder="Usage (e.g., Fever, Painkiller)"
+        required
+        class="mb-4 px-4 py-3 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-base transition resize-y"
+      ></textarea>
+      <input
+        type="number"
+        id="stock"
+        placeholder="Stock Quantity"
+        required
+        class="mb-4 px-4 py-3 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-base transition"
+      />
+      <input
+        type="text"
+        id="substitutes"
+        placeholder="Substitutes (comma separated)"
+        class="mb-6 px-4 py-3 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-base transition"
+      />
+      <button
+        type="submit"
+        class="bg-gradient-to-r from-green-500 to-blue-400 hover:from-green-700 hover:to-blue-500 text-white py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
+      >
+        Save Medicine
+      </button>
+    </form>
+
+    <h2 class="text-2xl font-bold text-blue-800 mb-4 text-center">
+      Medicine Inventory
+    </h2>
+    <div
+      class="w-full max-w-3xl mx-auto bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-blue-200 p-6 overflow-x-auto"
+    >
+      <table
+        id="medicineTable"
+        class="w-full text-left rounded-xl overflow-hidden"
+      >
+        <thead>
+          <tr class="bg-blue-600 text-white">
+            <th class="py-3 px-4">Name</th>
+            <th class="py-3 px-4">Usage</th>
+            <th class="py-3 px-4">Stock</th>
+            <th class="py-3 px-4">Substitutes</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <script>
+      const token = localStorage.getItem("token");
+
+      const fetchMedicines = async () => {
+        const res = await fetch("http://localhost:5000/api/medicines", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        const tbody = document.querySelector("#medicineTable tbody");
+        tbody.innerHTML = "";
+        data.forEach((med) => {
+          const row = `
+          <tr class="hover:bg-blue-50 transition">
+            <td class="py-3 px-4">${med.name}</td>
+            <td class="py-3 px-4">${med.usage}</td>
+            <td class="py-3 px-4">${med.stock}</td>
+            <td class="py-3 px-4">${med.substitutes}</td>
+          </tr>
+        `;
+          tbody.innerHTML += row;
+        });
+      };
+
+      document
+        .getElementById("medicineForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const name = document.getElementById("name").value;
+          const usage = document.getElementById("usage").value;
+          const stock = parseInt(document.getElementById("stock").value);
+          const substitutes = document.getElementById("substitutes").value;
+
+          try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(
+              "http://localhost:5000/api/medicines/save",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ name, usage, stock, substitutes }),
+              }
+            );
+
+            const result = await res.json();
+
+            if (!res.ok) {
+              throw new Error(result.message || "Server error occurred");
+            }
+
+            alert(result.message || "Saved successfully");
+            document.getElementById("medicineForm").reset();
+            fetchMedicines();
+          } catch (err) {
+            console.error("Error submitting medicine:", err);
+            alert("Failed to submit medicine.");
+          }
+        });
+
+      // Initial fetch
+      fetchMedicines();
+    </script>
+  </body>
+</html>

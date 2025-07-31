@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reported Side Effects - Pharmacist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-300 flex items-center justify-center py-10 px-2"
+  >
+    <div
+      class="w-full max-w-5xl mx-auto bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-blue-200 p-8"
+    >
+      <h2 class="text-3xl font-bold text-blue-900 mb-6 drop-shadow text-center">
+        Reported Side Effects - Pharmacist
+      </h2>
+      <table
+        id="reportsTable"
+        class="w-full text-left rounded-xl overflow-hidden mb-8"
+      >
+        <thead>
+          <tr class="bg-blue-600 text-white">
+            <th class="py-3 px-4">ID</th>
+            <th class="py-3 px-4">Patient Name</th>
+            <th class="py-3 px-4">Symptom</th>
+            <th class="py-3 px-4">Date Reported</th>
+            <th class="py-3 px-4">Pharmacist-Reply</th>
+            <th class="py-3 px-4">Doctor-Reply</th>
+          </tr>
+        </thead>
+        <tbody
+          class="divide-y divide-blue-100 bg-white/60 backdrop-blur-sm"
+        ></tbody>
+      </table>
+      <div class="flex flex-wrap justify-center gap-4 mt-2">
+        <button
+          class="bg-red-500 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-all duration-200"
+          onclick="logout()"
+        >
+          Logout
+        </button>
+        <button
+          class="bg-green-500 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-all duration-200"
+          onclick="window.location.href='medicine_form.html'"
+        >
+          Medicine Management
+        </button>
+        <button
+          class="bg-purple-500 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-all duration-200"
+          onclick="window.location.href='side-effects.html'"
+        >
+          Side Effects Reports
+        </button>
+      </div>
+    </div>
+    <script src="js/side-effects-dashboard.js"></script>
+  </body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PharmaHelp - Your Digital Health Partner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="shortcut icon" href="../1.jpg" type="image/x-icon" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+  </style>
+</head>
+<body class="relative min-h-screen flex flex-col items-center justify-center bg-blue-50">
+  <!-- Background Image -->
+  <div class="fixed inset-0 z-0">
+    <img src="../pharmahelp-bg.png" alt="PharmaHelp Background" class="object-cover object-right w-full h-full opacity-80
+    " />
+  </div>
+  <!-- Overlay for gradient effect -->
+  <div class="fixed inset-0 bg-gradient-to-br from-blue-100 via-white/80 to-blue-300 z-10"></div>
+
+  <!-- Main Content -->
+  <main class="relative z-20 flex flex-col items-center w-full">
+  <section
+  class="relative max-w-5xl h-[400px] mt-20 mb-12 rounded-2xl shadow-2xl border border-blue-200  bg-[url('../pharmahelp-bg.png')] bg-cover bg-right"
+>
+  <div class="relative h-[400px] z-10 bg-white/40 rounded-2xl p-10 ">
+    <!-- <h1 class="text-5xl md:text-6xl font-extrabold text-blue-900 mb-6 drop-shadow-lg">PharmaHelp</h1> -->
+    <p class="text-lg md:text-xl text-blue-700 font-semibold bg-blue-50 bg-opacity-60 rounded-xl px-6 py-4 mb-[170px] shadow">
+      Your digital assistant for managing prescriptions, medicine info, and patient care. 
+    </p>
+    <div class="flex flex-wrap justify-center gap-6 mb-4">
+      <a href="login.html" class="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition-all duration-200">Login</a>
+      <a href="register.html" class="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition-all duration-200">Register</a>
+    </div>
+  </div>
+</section>
+  <!-- ...existing code for features section... -->
+
+    <section class="features grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl w-full mb-16">
+      <div class="feature-card bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-blue-100 hover:-translate-y-2 hover:shadow-2xl transition-all duration-200 flex flex-col items-center">
+        <span class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-4xl shadow-md mb-4">🩺</span>
+        <h3 class="text-blue-700 text-2xl font-bold mb-2">Prescription Management</h3>
+        <p class="text-gray-700 text-base text-center">View, upload, and download your medical prescriptions with ease and security.</p>
+      </div>
+      <div class="feature-card bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-blue-100 hover:-translate-y-2 hover:shadow-2xl transition-all duration-200 flex flex-col items-center">
+        <span class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-4xl shadow-md mb-4">💊</span>
+        <h3 class="text-blue-700 text-2xl font-bold mb-2">Medicine Availability</h3>
+        <p class="text-gray-700 text-base text-center">Check real-time stock, usage, and alternatives of medicines available near you.</p>
+      </div>
+      <div class="feature-card bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-blue-100 hover:-translate-y-2 hover:shadow-2xl transition-all duration-200 flex flex-col items-center">
+        <span class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-4xl shadow-md mb-4">⚠️</span>
+        <h3 class="text-blue-700 text-2xl font-bold mb-2">Report Side Effects</h3>
+        <p class="text-gray-700 text-base text-center">Help improve health tracking by reporting side effects to your pharmacist instantly.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="relative z-20 mt-auto w-full">
+    <div class="max-w-6xl mx-auto px-4 py-8 flex flex-col md:flex-row items-center justify-center bg-white/80 backdrop-blur-md rounded-xl shadow-lg border border-blue-100">
+      <div class="text-gray-600 text-sm ">&copy; 2025 PharmaHelp. All rights reserved.</div>
+    </div>
+  </footer>
+</body>
+</html>
