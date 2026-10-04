@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const DB_DIR = path.join(__dirname, '../data');
 const DB_FILE = path.join(DB_DIR, 'pharmahelp_db.json');
