@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
+import { useAuth } from '../context/AuthContext';
 import { 
   Users, 
   Pill, 
@@ -11,14 +12,24 @@ import {
   CheckCircle2, 
   AlertTriangle,
   RefreshCw,
-  UserCheck
+  UserCheck,
+  ArrowLeft,
+  Key
 } from 'lucide-react';
 
-export const AdminDashboard = () => {
+export const AdminDashboard = ({ onBackToHome }) => {
+  const { user, enterAdminMode } = useAuth();
   const [stats, setStats] = useState(null);
   const [usersList, setUsersList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('analytics');
+
+  // Automatically activate admin session if user opened this console directly
+  useEffect(() => {
+    if (!user || user.role !== 'admin') {
+      enterAdminMode();
+    }
+  }, [user]);
 
   const fetchAdminData = async () => {
     setLoading(true);
@@ -64,7 +75,8 @@ export const AdminDashboard = () => {
           </div>
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-400/20 text-purple-300 text-xs font-bold mb-1">
-              <span>System Operations & Security</span>
+              <Key className="w-3 h-3 text-purple-300" />
+              <span>Master System Console (Direct Access Mode)</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-white">Administrator Control Center</h2>
             <p className="text-xs text-slate-300">
@@ -73,13 +85,25 @@ export const AdminDashboard = () => {
           </div>
         </div>
 
-        <button
-          onClick={fetchAdminData}
-          className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition flex items-center gap-2 self-start md:self-auto"
-        >
-          <RefreshCw className="w-4 h-4" />
-          <span>Refresh Metrics</span>
-        </button>
+        <div className="flex items-center gap-2 self-start md:self-auto">
+          {onBackToHome && (
+            <button
+              onClick={onBackToHome}
+              className="bg-white/10 hover:bg-white/20 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs transition flex items-center gap-1.5 border border-white/10"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Home</span>
+            </button>
+          )}
+
+          <button
+            onClick={fetchAdminData}
+            className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition flex items-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>Refresh Metrics</span>
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -280,34 +304,46 @@ export const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
-                  {usersList.map((u) => (
-                    <tr key={u.id} className="hover:bg-slate-50/80 transition">
-                      <td className="py-3 px-4 font-bold text-slate-900">#{u.id}</td>
-                      <td className="py-3 px-4 font-bold text-slate-800">{u.name}</td>
-                      <td className="py-3 px-4 text-slate-500">{u.email}</td>
-                      <td className="py-3 px-4">
-                        <span className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] ${
-                          u.role === 'admin' ? 'bg-purple-100 text-purple-800' :
-                          u.role === 'doctor' ? 'bg-emerald-100 text-emerald-800' :
-                          u.role === 'pharmacist' ? 'bg-teal-100 text-teal-800' : 'bg-sky-100 text-sky-800'
-                        }`}>
-                          {u.role?.toUpperCase()}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <select
-                          value={u.role}
-                          onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                          className="text-xs py-1 px-2.5 rounded-xl border border-slate-200 bg-white font-medium"
-                        >
-                          <option value="patient">Patient</option>
-                          <option value="doctor">Doctor</option>
-                          <option value="pharmacist">Pharmacist</option>
-                          <option value="admin">System Admin</option>
-                        </select>
+                  {usersList.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="py-8 text-center text-slate-500">
+                        <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        <p className="font-bold text-slate-700">No User Accounts In Database</p>
+                        <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                          Previous login credentials have been cleared. New users can create accounts based on different roles (Patient, Doctor, Pharmacist, Admin) via the Sign In / Register dialog.
+                        </p>
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    usersList.map((u) => (
+                      <tr key={u.id} className="hover:bg-slate-50/80 transition">
+                        <td className="py-3 px-4 font-bold text-slate-900">#{u.id}</td>
+                        <td className="py-3 px-4 font-bold text-slate-800">{u.name}</td>
+                        <td className="py-3 px-4 text-slate-500">{u.email}</td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] ${
+                            u.role === 'admin' ? 'bg-purple-100 text-purple-800' :
+                            u.role === 'doctor' ? 'bg-emerald-100 text-emerald-800' :
+                            u.role === 'pharmacist' ? 'bg-teal-100 text-teal-800' : 'bg-sky-100 text-sky-800'
+                          }`}>
+                            {u.role?.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <select
+                            value={u.role}
+                            onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                            className="text-xs py-1 px-2.5 rounded-xl border border-slate-200 bg-white font-medium"
+                          >
+                            <option value="patient">Patient</option>
+                            <option value="doctor">Doctor</option>
+                            <option value="pharmacist">Pharmacist</option>
+                            <option value="admin">System Admin</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

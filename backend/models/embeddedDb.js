@@ -44,16 +44,8 @@ const initData = () => {
     }
   }
 
-  const salt = bcrypt.genSaltSync(10);
-  const demoHash = bcrypt.hashSync('DemoPass123!', salt);
-
   data = {
-    users: [
-      { id: 1, name: 'Angshuman Roy', email: 'angshumanroy200@gmail.com', password: demoHash, role: 'patient' },
-      { id: 2, name: 'Pawan (System Admin)', email: 'pawan2004@gmail.com', password: demoHash, role: 'admin' },
-      { id: 3, name: 'Ping (Lead Pharmacist)', email: 'ping24@gmail.com', password: demoHash, role: 'pharmacist' },
-      { id: 4, name: 'Dr. Alice Grey, MD', email: 'alice200@gmail.com', password: demoHash, role: 'doctor' }
-    ],
+    users: [],
     medicines: [
       { id: 1, name: 'Paracetamol 650mg', usage: 'Fever, mild-to-moderate headache and body ache', stock: 120, substitutes: 'Dolo 650, Calpol 650', category: 'Analgesics & Antipyretics', price: 4.50, manufacturer: 'GlaxoSmithKline', dosage_form: 'Tablet', requires_prescription: 0 },
       { id: 2, name: 'Amoxicillin 500mg', usage: 'Bacterial infections, respiratory tract infections', stock: 45, substitutes: 'Mox 500, Novamox 500', category: 'Antibiotics', price: 18.20, manufacturer: 'Alkem Labs', dosage_form: 'Capsule', requires_prescription: 1 },
@@ -239,55 +231,38 @@ const executeSql = (sql, params = []) => {
     if (!col) return [];
 
     let filtered = [...col];
-    let pIdx = 0;
 
     // Filter by WHERE clauses
     if (lower.includes('where')) {
       const whereClause = norm.substring(lower.indexOf('where') + 5);
 
+      let pIdx = 0;
+      const targetEmail = whereClause.includes('email = ?') ? (params[pIdx++] || '').toLowerCase().trim() : null;
+      const targetRole = whereClause.includes('role = ?') ? params[pIdx++] : null;
+      const targetPatientId = whereClause.includes('patient_id = ?') ? params[pIdx++] : null;
+      const targetUserId = whereClause.includes('user_id = ?') ? params[pIdx++] : null;
+      const targetDoctorId = whereClause.includes('doctor_id = ?') ? params[pIdx++] : null;
+      const targetId = whereClause.includes('id = ?') ? params[pIdx++] : null;
+      const targetCategory = whereClause.includes('category = ?') ? params[pIdx++] : null;
+      const searchTerm = (whereClause.includes('name like ?') || whereClause.includes('`usage` like ?')) 
+        ? (params[pIdx++] || '').replace(/%/g, '').toLowerCase().trim() 
+        : null;
+
       filtered = filtered.filter(item => {
-        // Param matching
-        if (whereClause.includes('email = ?')) {
-          const target = (params[pIdx++] || '').toLowerCase().trim();
-          return (item.email || '').toLowerCase().trim() === target;
-        }
-        if (whereClause.includes('role = ?')) {
-          const targetRole = params[pIdx++];
-          return item.role === targetRole;
-        }
-        if (whereClause.includes('patient_id = ?')) {
-          const pId = params[pIdx++];
-          return item.patient_id === pId;
-        }
-        if (whereClause.includes('user_id = ?')) {
-          const uId = params[pIdx++];
-          return item.user_id === uId;
-        }
-        if (whereClause.includes('doctor_id = ?')) {
-          const dId = params[pIdx++];
-          return item.doctor_id === dId;
-        }
-        if (whereClause.includes('id = ?')) {
-          const id = params[pIdx++];
-          return item.id == id;
-        }
-        if (whereClause.includes("role = 'doctor'")) {
-          return item.role === 'doctor';
-        }
-        if (whereClause.includes("role = 'patient'")) {
-          return item.role === 'patient';
-        }
-        if (whereClause.includes('category = ?')) {
-          const cat = params[pIdx++];
-          return item.category === cat;
-        }
-        if (whereClause.includes('name like ?') || whereClause.includes('`usage` like ?')) {
-          const term = (params[0] || '').replace(/%/g, '').toLowerCase().trim();
-          return (
-            (item.name || '').toLowerCase().includes(term) ||
-            (item.usage || '').toLowerCase().includes(term) ||
-            (item.substitutes || '').toLowerCase().includes(term)
-          );
+        if (targetEmail !== null && (item.email || '').toLowerCase().trim() !== targetEmail) return false;
+        if (targetRole !== null && item.role !== targetRole) return false;
+        if (targetPatientId !== null && item.patient_id != targetPatientId) return false;
+        if (targetUserId !== null && item.user_id != targetUserId) return false;
+        if (targetDoctorId !== null && item.doctor_id != targetDoctorId) return false;
+        if (targetId !== null && item.id != targetId) return false;
+        if (whereClause.includes("role = 'doctor'") && item.role !== 'doctor') return false;
+        if (whereClause.includes("role = 'patient'") && item.role !== 'patient') return false;
+        if (targetCategory !== null && item.category !== targetCategory) return false;
+        if (searchTerm !== null) {
+          const match = (item.name || '').toLowerCase().includes(searchTerm) ||
+            (item.usage || '').toLowerCase().includes(searchTerm) ||
+            (item.substitutes || '').toLowerCase().includes(searchTerm);
+          if (!match) return false;
         }
         return true;
       });

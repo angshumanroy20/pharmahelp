@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { X, Lock, Mail, User, Shield, AlertCircle, Sparkles } from 'lucide-react';
 
 export const AuthModal = ({ isOpen, onClose }) => {
-  const { login, register, demoLogin } = useAuth();
+  const { login, register, demoLogin, enterAdminMode } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -24,14 +24,14 @@ export const AuthModal = ({ isOpen, onClose }) => {
     try {
       if (isRegister) {
         await register(formData);
-        alert('Registration successful! Logging in now...');
+        alert(`Account created successfully for ${formData.role.toUpperCase()}! Logging in now...`);
         await login(formData.email, formData.password);
       } else {
         await login(formData.email, formData.password);
       }
       onClose();
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Operation failed');
     } finally {
       setLoading(false);
     }
@@ -41,6 +41,11 @@ export const AuthModal = ({ isOpen, onClose }) => {
     setLoading(true);
     setError(null);
     try {
+      if (role === 'admin') {
+        enterAdminMode();
+        onClose();
+        return;
+      }
       await demoLogin(role);
       onClose();
     } catch (err) {

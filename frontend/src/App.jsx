@@ -23,6 +23,14 @@ export const App = () => {
   const [isInteractionsOpen, setIsInteractionsOpen] = useState(false);
 
   const renderActiveView = () => {
+    if (activeTab === 'admin') {
+      return (
+        <AdminDashboard 
+          onBackToHome={() => setActiveTab('home')} 
+        />
+      );
+    }
+
     if (activeTab === 'medicines') {
       return (
         <MedicineCatalogView 

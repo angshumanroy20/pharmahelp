@@ -5,6 +5,10 @@ import {
   Activity, 
   Pill, 
   FileText, 
+import { 
+  Activity, 
+  Pill, 
+  FileText, 
   Stethoscope, 
   ShieldAlert, 
   ShoppingCart, 
@@ -12,25 +16,36 @@ import {
   LogOut, 
   Menu, 
   X, 
-  Sparkles,
-  Zap,
-  LayoutDashboard
+  Sparkles, 
+  Zap, 
+  LayoutDashboard,
+  Shield
 } from 'lucide-react';
 
 export const Navbar = ({ activeTab, setActiveTab, onOpenAuth, onOpenScanner, onOpenInteractions }) => {
-  const { user, logout, demoLogin } = useAuth();
+  const { user, logout, demoLogin, enterAdminMode } = useAuth();
   const { cartCount, setIsCartOpen } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [demoDropdownOpen, setDemoDropdownOpen] = useState(false);
 
   const handleDemoSwitch = async (role) => {
     try {
+      if (role === 'admin') {
+        enterAdminMode();
+        setDemoDropdownOpen(false);
+        setMobileMenuOpen(false);
+        setActiveTab('admin');
+        return;
+      }
       await demoLogin(role);
       setDemoDropdownOpen(false);
       setMobileMenuOpen(false);
       setActiveTab('portal');
     } catch (e) {
-      alert('Demo switch failed: ' + e.message);
+      console.warn('Switch warning:', e.message);
+      setDemoDropdownOpen(false);
+      setMobileMenuOpen(false);
+      setActiveTab(role === 'admin' ? 'admin' : 'portal');
     }
   };
 
@@ -130,6 +145,23 @@ export const Navbar = ({ activeTab, setActiveTab, onOpenAuth, onOpenScanner, onO
                 {user.role === 'admin' && 'Admin Hub'}
               </button>
             )}
+
+            {/* Dedicated Separate System Admin Access */}
+            <button
+              onClick={() => {
+                enterAdminMode();
+                setActiveTab('admin');
+              }}
+              className={`px-3 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-1.5 ${
+                activeTab === 'admin'
+                  ? 'bg-purple-700 text-white shadow-md'
+                  : 'bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200 shadow-sm'
+              }`}
+              title="Dedicated Direct Access to System Admin Dashboard"
+            >
+              <Shield className="w-4 h-4 text-purple-600" />
+              <span>System Admin</span>
+            </button>
           </nav>
 
           {/* Right Action Bar */}
@@ -271,6 +303,18 @@ export const Navbar = ({ activeTab, setActiveTab, onOpenAuth, onOpenScanner, onO
           >
             <ShieldAlert className="w-4 h-4 text-rose-500" />
             Drug Interaction Checker
+          </button>
+
+          <button
+            onClick={() => {
+              enterAdminMode();
+              setActiveTab('admin');
+              setMobileMenuOpen(false);
+            }}
+            className="w-full text-left px-3 py-2.5 rounded-xl font-bold bg-purple-100 text-purple-900 border border-purple-200 flex items-center gap-2"
+          >
+            <Shield className="w-4 h-4 text-purple-700" />
+            System Admin Console (Direct Access)
           </button>
 
           {user ? (
