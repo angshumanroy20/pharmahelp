@@ -4,6 +4,15 @@ const db = require('../models/db');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'pharmahelp_super_secret_jwt_key_2025';
 
+// Check if a system admin already exists
+exports.getAdminStatus = (req, res) => {
+  db.query("SELECT COUNT(*) AS adminCount FROM users WHERE role = 'admin'", (err, results) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err.message });
+    const count = results[0]?.adminCount || results[0]?.val || 0;
+    res.json({ hasAdmin: count > 0 });
+  });
+};
+
 exports.register = async (req, res) => {
   const { name, email, password, role } = req.body;
 
@@ -16,23 +25,41 @@ exports.register = async (req, res) => {
     return res.status(400).json({ message: "Invalid role selected" });
   }
 
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    db.query(
-      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [name, email.toLowerCase().trim(), hashedPassword, role],
-      (err, result) => {
-        if (err) {
-          if (err.code === 'ER_DUP_ENTRY') {
-            return res.status(400).json({ message: 'Email is already registered' });
+  const proceedWithRegistration = async () => {
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      db.query(
+        'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+        [name.trim(), email.toLowerCase().trim(), hashedPassword, role],
+        (err, result) => {
+          if (err) {
+            if (err.code === 'ER_DUP_ENTRY' || (err.message && err.message.includes('duplicate'))) {
+              return res.status(400).json({ message: 'An account with this email is already registered' });
+            }
+            return res.status(500).json({ message: 'Database error', error: err.message });
           }
-          return res.status(500).json({ message: 'Database error', error: err.message });
+          res.status(201).json({ message: 'Account registered successfully. You can now login.' });
         }
-        res.status(201).json({ message: 'User registered successfully. You can now login.' });
+      );
+    } catch (err) {
+      res.status(500).json({ message: 'Server error', error: err.message });
+    }
+  };
+
+  // Enforce: System admin is available ONLY to the one person registering for the first time
+  if (role === 'admin') {
+    db.query("SELECT COUNT(*) AS adminCount FROM users WHERE role = 'admin'", (err, results) => {
+      if (err) return res.status(500).json({ message: 'Database check failed' });
+      const adminCount = results[0]?.adminCount || results[0]?.val || 0;
+      if (adminCount > 0) {
+        return res.status(403).json({
+          message: 'The System Administrator role has already been claimed. System admin is only available to the first registering administrator.'
+        });
       }
-    );
-  } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+      proceedWithRegistration();
+    });
+  } else {
+    proceedWithRegistration();
   }
 };
 
@@ -44,11 +71,11 @@ exports.login = (req, res) => {
 
   db.query('SELECT * FROM users WHERE email = ?', [email.toLowerCase().trim()], async (err, results) => {
     if (err) return res.status(500).json({ message: 'Database error', error: err.message });
-    if (results.length === 0) return res.status(404).json({ message: 'User with this email not found' });
+    if (results.length === 0) return res.status(404).json({ message: 'No account found with this email' });
 
     const user = results[0];
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: 'Invalid password credentials' });
+    if (!isMatch) return res.status(401).json({ message: 'Incorrect password' });
 
     const token = jwt.sign(
       { id: user.id, name: user.name, email: user.email, role: user.role },
@@ -60,55 +87,6 @@ exports.login = (req, res) => {
       token,
       user: { id: user.id, name: user.name, email: user.email, role: user.role }
     });
-  });
-};
-
-// 1-Click Demo Login for testing and rapid switching between roles
-exports.demoLogin = (req, res) => {
-  const { role } = req.body; // 'patient' | 'doctor' | 'pharmacist' | 'admin'
-  const validRoles = ['patient', 'doctor', 'pharmacist', 'admin'];
-
-  const targetRole = validRoles.includes(role) ? role : 'patient';
-
-  db.query('SELECT * FROM users WHERE role = ? LIMIT 1', [targetRole], async (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error', error: err.message });
-
-    if (results.length > 0) {
-      const user = results[0];
-      const token = jwt.sign(
-        { id: user.id, name: user.name, email: user.email, role: user.role },
-        JWT_SECRET,
-        { expiresIn: '7d' }
-      );
-      return res.json({
-        token,
-        user: { id: user.id, name: user.name, email: user.email, role: user.role }
-      });
-    }
-
-    // If no user exists with this role, create a default demo user
-    const defaultUsers = {
-      patient: { name: 'Angshuman Roy', email: 'patient.demo@pharmahelp.com' },
-      doctor: { name: 'Dr. Alice Grey, MD', email: 'doctor.demo@pharmahelp.com' },
-      pharmacist: { name: 'Ping (Lead Pharmacist)', email: 'pharmacist.demo@pharmahelp.com' },
-      admin: { name: 'Pawan (System Admin)', email: 'admin.demo@pharmahelp.com' }
-    };
-
-    const targetUser = defaultUsers[targetRole];
-    const hashedPassword = await bcrypt.hash('DemoPass123!', 10);
-
-    db.query(
-      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [targetUser.name, targetUser.email, hashedPassword, targetRole],
-      (err2, insertResult) => {
-        if (err2) return res.status(500).json({ message: 'Failed to create demo user', error: err2.message });
-
-        const newUser = { id: insertResult.insertId, name: targetUser.name, email: targetUser.email, role: targetRole };
-        const token = jwt.sign(newUser, JWT_SECRET, { expiresIn: '7d' });
-
-        res.json({ token, user: newUser });
-      }
-    );
   });
 };
 
