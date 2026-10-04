@@ -1,302 +1,100 @@
-// const db = require('../models/db');
-
-// // exports.getAllMedicines = (req, res) => {
-// //   db.query('SELECT * FROM medicines', (err, results) => {
-// //     if (err) return res.status(500).json({ error: err });
-// //     res.json(results);
-// //   });
-// // };
-
-// // exports.searchMedicine = (req, res) => {
-// //   const search = req.query.q;
-// //   db.query(
-// //     'SELECT * FROM medicines WHERE name LIKE ?',
-// //     [`%${search}%`],
-// //     (err, results) => {
-// //       if (err) return res.status(500).json({ error: err });
-// //       res.json(results);
-// //     }
-// //   );
-// // };
-
-// // exports.addMedicine = (req, res) => {
-// //   const { name, description, usage, stock, substitutes } = req.body;
-// //   db.query(
-// //     'INSERT INTO medicines (name, description, usage, stock, substitutes) VALUES (?, ?, ?, ?, ?)',
-// //     [name, description, usage, stock || 0, substitutes || null],
-// //     (err) => {
-// //       if (err) return res.status(500).json({ error: err });
-// //       res.status(201).json({ message: 'Medicine added successfully' });
-// //     }
-// //   );
-// // };
-
-
-// exports.getAllMedicines = (req, res) => {
-//   db.query('SELECT * FROM medicines', (err, results) => {
-//     if (err) return res.status(500).json({ error: err });
-//     res.json(results);
-//   });
-// };
-
-// // exports.searchMedicine = (req, res) => {
-// //   const search = req.query.q;
-// //   db.query(
-// //     'SELECT * FROM medicines WHERE name LIKE ?',
-// //     [`%${search}%`],
-// //     (err, results) => {
-// //       if (err) return res.status(500).json({ error: err });
-// //       res.json(results);
-// //     }
-// //   );
-// // };
-
-
-// exports.searchMedicine = (req, res) => {
-//   const search = req.query.q;
-
-//   if (!search || search.trim() === '') {
-//     return res.status(400).json({ message: 'Search query cannot be empty' });
-//   }
-
-//   const sql = 'SELECT * FROM medicines WHERE name LIKE ?';
-//   const values = [`%${search}%`];
-
-//   db.query(sql, values, (err, results) => {
-//     if (err) return res.status(500).json({ error: err });
-//     res.json(results);
-//   });
-// };
-
-
-// exports.addMedicine = (req, res) => {
-//   const { name, usage, stock, substitutes } = req.body;
-//   db.query(
-//     'INSERT INTO medicines (name,  usage, stock, substitutes) VALUES (?, ?, ?, ?)',
-//     [name, usage, stock || 0, substitutes || null],
-//     (err) => {
-//       if (err) return res.status(500).json({ error: err });
-//       res.status(201).json({ message: 'Medicine added successfully' });
-//     }
-//   );
-// };
-
-
-
-
-// // Get all medicines or search by name
-// exports.getMedicines = (req, res) => {
-//   const search = req.query.search || '';
-//   db.query(
-//     'SELECT * FROM medicines WHERE name LIKE ?',
-//     [`%${search}%`],
-//     (err, results) => {
-//       if (err) return res.status(500).json({ error: err });
-//       res.json(results);
-//     }
-//   );
-// };
-
-// // Admin: Add or update a medicine
-// exports.addOrUpdateMedicine = (req, res) => {
-//   const { name, usage, stock, substitutes } = req.body;
-
-//   if (!name || !usage || stock === undefined) {
-//     return res.status(400).json({ message: 'Missing required fields' });
-//   }
-
-//   const sql = `
-//     INSERT INTO medicines (name, usage, stock, substitutes)
-//     VALUES (?, ?, ?, ?)
-//     ON DUPLICATE KEY UPDATE
-//       usage = VALUES(usage),
-//       stock = VALUES(stock),
-//       substitutes = VALUES(substitutes)
-//   `;
-
-//   db.query(sql, [name, usage, stock, substitutes], (err) => {
-//     if (err) {
-//       console.error('Error saving medicine:', err);
-//       return res.status(500).json({ error: 'Failed to save medicine' });
-//     }
-//     res.status(200).json({ message: 'Medicine saved successfully' });
-//   });
-// };
-
-
-
-// // GET all medicines
-// exports.getAllMedicines = (req, res) => {
-//   db.query('SELECT * FROM medicines', (err, results) => {
-//     if (err) return res.status(500).json({ error: err });
-//     res.json(results);
-//   });
-// };
-
-// // POST to save or update medicine
-// exports.saveMedicine = (req, res) => {
-//   const { name, usage, stock, substitutes } = req.body;
-
-//   // Check if medicine already exists
-//   db.query('SELECT * FROM medicines WHERE name = ?', [name], (err, results) => {
-//     if (err) return res.status(500).json({ error: err });
-
-//     if (results.length > 0) {
-//       // Update existing
-//       db.query(
-//         'UPDATE medicines SET usage=?, stock=?, substitutes=? WHERE name=?',
-//         [usage, stock, substitutes, name],
-//         (err2) => {
-//           if (err2) return res.status(500).json({ error: err2 });
-//           res.json({ message: 'Medicine updated successfully' });
-//         }
-//       );
-//     } else {
-//       // Insert new
-//       db.query(
-//         'INSERT INTO medicines (name, usage, stock, substitutes) VALUES (?, ?, ?, ?)',
-//         [name, usage, stock, substitutes],
-//         (err3) => {
-//           if (err3) return res.status(500).json({ error: err3 });
-//           res.json({ message: 'Medicine added successfully' });
-//         }
-//       );
-//     }
-//   });
-// };
-
-
-
-
-// main file---->
-
 const db = require('../models/db');
 
-// Get all medicines
+// Get all medicines with optional category and search filters
 exports.getAllMedicines = (req, res) => {
-  db.query('SELECT * FROM medicines', (err, results) => {
-    if (err) return res.status(500).json({ error: err });
-    res.json(results);
-  });
-};
+  const { category, search } = req.query;
 
-// Search medicines by name
-exports.searchMedicine = (req, res) => {
-  const search = req.query.q;
+  let sql = 'SELECT * FROM medicines WHERE 1=1';
+  const params = [];
 
-  if (!search || search.trim() === '') {
-    return res.status(400).json({ message: 'Search query cannot be empty' });
+  if (category && category !== 'All') {
+    sql += ' AND category = ?';
+    params.push(category);
   }
 
-  const sql = 'SELECT * FROM medicines WHERE name LIKE ?';
-  const values = [`%${search}%`];
+  if (search && search.trim() !== '') {
+    sql += ' AND (name LIKE ? OR `usage` LIKE ? OR substitutes LIKE ?)';
+    const term = `%${search.trim()}%`;
+    params.push(term, term, term);
+  }
 
-  db.query(sql, values, (err, results) => {
-    if (err) return res.status(500).json({ error: err });
+  sql += ' ORDER BY name ASC';
+
+  db.query(sql, params, (err, results) => {
+    if (err) return res.status(500).json({ message: 'Error fetching medicines', error: err.message });
     res.json(results);
   });
 };
 
-// Add or Update Medicine
-// exports.addOrUpdateMedicine = (req, res) => {
-//   const { name, usage, stock, substitutes } = req.body;
+// Search medicines
+exports.searchMedicine = (req, res) => {
+  const search = req.query.q || '';
 
-//   if (!name || !usage || stock === undefined) {
-//     return res.status(400).json({ message: 'Missing required fields' });
-//   }
-//   console.log("Received data:", { name, usage, stock, substitutes });
-//   console.log("Running SQL INSERT/UPDATE...");
+  if (!search || search.trim() === '') {
+    return exports.getAllMedicines(req, res);
+  }
 
-//   const sql = `
-//     INSERT INTO medicines (name, usage, stock, substitutes)
-//     VALUES (?, ?, ?, ?)
-//     ON DUPLICATE KEY UPDATE
-//       usage = VALUES(usage),
-//       stock = VALUES(stock),
-//       substitutes = VALUES(substitutes)
-//   `;
+  const sql = 'SELECT * FROM medicines WHERE name LIKE ? OR `usage` LIKE ? OR substitutes LIKE ? ORDER BY name ASC';
+  const term = `%${search.trim()}%`;
 
-//   db.query(sql, [name, usage, stock, substitutes], (err) => {
-//     // if (err) {
-//     //   console.error('Error saving medicine:', err);
-//     //   return res.status(500).json({ error: 'Failed to save medicine' });
-//     // }
-//     if (err) {
-//       console.error('Error saving medicine:', err);
-//       return res.status(500).json({ error: err.message });
-//     }
-    
-//     res.status(200).json({ message: 'Medicine saved successfully' });
-//   });
-// };
+  db.query(sql, [term, term, term], (err, results) => {
+    if (err) return res.status(500).json({ message: 'Search failed', error: err.message });
+    res.json(results);
+  });
+};
 
+// Add or Update Medicine (Pharmacist/Admin)
 exports.addOrUpdateMedicine = (req, res) => {
-  console.log("🧪 Received POST /save with body:", req.body);
+  const { name, usage, stock, substitutes, category, price, manufacturer, dosage_form, requires_prescription } = req.body;
 
-  const { name, usage, stock, substitutes } = req.body;
-
-  if (!name || !usage || stock === undefined) {
-    console.log("Missing fields:", req.body);
-    return res.status(400).json({ message: 'Missing required fields' });
+  if (!name || stock === undefined) {
+    return res.status(400).json({ message: 'Medicine name and stock are required' });
   }
 
   const sql = `
-    INSERT INTO medicines (name, \`usage\`, stock, substitutes)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO medicines (name, \`usage\`, stock, substitutes, category, price, manufacturer, dosage_form, requires_prescription)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON DUPLICATE KEY UPDATE
       \`usage\` = VALUES(\`usage\`),
       stock = VALUES(stock),
-      substitutes = VALUES(substitutes)
+      substitutes = VALUES(substitutes),
+      category = VALUES(category),
+      price = VALUES(price),
+      manufacturer = VALUES(manufacturer),
+      dosage_form = VALUES(dosage_form),
+      requires_prescription = VALUES(requires_prescription)
   `;
 
-  db.query(sql, [name, usage, stock, substitutes], (err, result) => {
-    if (err) {
-      console.error('❌ Error saving medicine:', err); // This should now show in your terminal
-      return res.status(500).json({ error: 'Failed to save medicine' });
-    }
+  const values = [
+    name,
+    usage || 'General healthcare',
+    parseInt(stock) || 0,
+    substitutes || 'None',
+    category || 'General',
+    parseFloat(price) || 10.00,
+    manufacturer || 'PharmaCore Labs',
+    dosage_form || 'Tablet',
+    requires_prescription ? 1 : 0
+  ];
 
-    console.log("Medicine saved:", result);
-    res.status(200).json({ message: 'Medicine saved successfully' });
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error('Error saving medicine:', err);
+      return res.status(500).json({ message: 'Failed to save medicine', error: err.message });
+    }
+    res.json({ message: 'Medicine saved successfully' });
   });
 };
 
-
-
-
-
-
-
-// Save new or update existing medicine
-exports.saveMedicine = (req, res) => {
-  const { name, usage, stock, substitutes } = req.body;
-
-  if (!name || !usage || stock === undefined) {
-    return res.status(400).json({ message: 'Missing required fields' });
+// Delete Medicine (Pharmacist/Admin)
+exports.deleteMedicine = (req, res) => {
+  if (req.user.role !== 'pharmacist' && req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Access denied' });
   }
 
-  db.query('SELECT * FROM medicines WHERE name = ?', [name], (err, results) => {
-    if (err) return res.status(500).json({ error: err });
-
-    if (results.length > 0) {
-      // Medicine exists, update it
-      db.query(
-        'UPDATE medicines SET usage=?, stock=?, substitutes=? WHERE name=?',
-        [usage, stock, substitutes, name],
-        (err2) => {
-          if (err2) return res.status(500).json({ error: err2 });
-          res.json({ message: 'Medicine updated successfully' });
-        }
-      );
-    } else {
-      // Insert new medicine
-      db.query(
-        'INSERT INTO medicines (name, usage, stock, substitutes) VALUES (?, ?, ?, ?)',
-        [name, usage, stock, substitutes],
-        (err3) => {
-          if (err3) return res.status(500).json({ error: err3 });
-          res.json({ message: 'Medicine added successfully' });
-        }
-      );
-    }
+  const { id } = req.params;
+  db.query('DELETE FROM medicines WHERE id = ?', [id], (err) => {
+    if (err) return res.status(500).json({ message: 'Failed to delete medicine', error: err.message });
+    res.json({ message: 'Medicine deleted successfully' });
   });
 };

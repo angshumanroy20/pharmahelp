@@ -1,127 +1,126 @@
-PHARMAHELP💊🩺💉
+# 💊 PharmaHelp 2.0 — Next-Generation Digital Health & Smart E-Pharmacy
 
+PharmaHelp 2.0 is a modern, full-stack digital health platform designed for **Patients**, **Pharmacists**, **Physicians**, and **System Administrators**. Built with a unified **React + Vite** frontend, **Tailwind CSS**, **Lucide Icons**, and a resilient **Node.js / Express / MySQL** backend.
 
-# pharmahelp
-healthcare platform!
+---
 
-# PharmaHelp
+## 🚀 Key Highlights & New Functionalities
 
-PharmaHelp is a modern digital health platform for patients, pharmacists, doctors, and admins. It enables prescription management, medicine search, side-effect reporting, and more, with a clean and professional UI built using Tailwind CSS.
+1. **AI Prescription OCR Scanner**:
+   - Analyzes prescription documents, deciphers doctor instructions, and extracts medicines, dosages, and administration intervals.
+   - 1-click addition of recognized prescription medicines directly to the shopping cart.
+2. **Clinical Drug-Drug Interaction Safety Engine**:
+   - Interactive pharmacology diagnostic tool that evaluates pairs or groups of medications.
+   - Calculates a live Safety Index Score and warns against adverse metabolic interactions, NSAID conflicts, or toxic combinations.
+3. **E-Pharmacy Medicine Catalog & Cart Checkout**:
+   - Search across 1,000+ medicines with therapeutic categories (Analgesics, Antibiotics, Antidiabetics, Cardiovascular, Gastrointestinal, etc.).
+   - Instant stock indicators, price display, and verified generic alternative brand substitutes.
+   - Interactive shopping cart slide-over with express delivery options and instant checkout.
+4. **Physician Teleconsultation Booking**:
+   - Schedule consultation slots with certified physicians (e.g. Dr. Alice Grey, MD).
+   - Doctors can manage their patient schedule, review consultation reasons, and issue clinical follow-up notes.
+5. **Daily Medication Reminders & Compliance Tracker**:
+   - Personalized pill alarms for morning, afternoon, and evening dosages.
+   - 1-click compliance checkbox with immediate persistent state tracking.
+6. **Pharmacovigilance & Side-Effect Reporting**:
+   - Patients log unexpected symptoms and adverse reactions.
+   - Pharmacists provide initial guidance; physicians clinically evaluate and verify cases.
+7. **1-Click Instant Role Demo Switcher**:
+   - Floating header widget enabling 1-click exploration of all 4 perspectives:
+     - 👤 **Patient** (Angshuman Roy)
+     - 🩺 **Doctor** (Dr. Alice Grey, MD)
+     - 💊 **Pharmacist** (Ping, Lead Pharmacist)
+     - 🛡️ **System Admin** (Pawan, Administrator)
+8. **Interactive Dashboards**:
+   - Executive KPIs, stock alerts, prescription verification pipeline, and user role management.
+9. **24/7 Emergency SOS Helpline Card**:
+   - Instant direct dialers for national emergency services (108 / 911) and poison control (1800-222-1222).
 
-## Features
+---
 
-- **Patient Portal:** Upload/download prescriptions, report side effects, check medicine availability.
-- **Pharmacist Dashboard:** View and reply to side-effect reports, manage medicines.
-- **Doctor Panel:** Review and reply to patient side-effect reports.
-- **Admin Panel:** View all prescriptions, manage users and medicines.
-- **Authentication:** Secure login/register for multiple roles.
-- **Responsive Design:** Works on desktop and mobile.
-
-## Folder Structure
+## 🏗️ Architecture & Tech Stack
 
 ```
 pharmahelp/
 ├── backend/
-│ ├── server.js
-│ ├── controllers/
-│ ├── middleware/
-│ ├── models/
-│ └── routes/
+│   ├── server.js                   # Unified Express 5 server + static client hosting
+│   ├── controllers/
+│   │   ├── authController.js       # Register, login, 1-click demo login, user roles
+│   │   ├── medicineController.js   # Inventory catalog, category filtering, stock
+│   │   ├── prescriptionController.js # Prescription upload & pharmacist approval
+│   │   ├── orderController.js      # Cart orders, status progression, stock sync
+│   │   ├── appointmentController.js # Doctor teleconsultation scheduling & notes
+│   │   ├── reminderController.js   # Daily pill reminders & compliance
+│   │   ├── clinicalAIController.js # Drug interactions & AI OCR simulation
+│   │   ├── sideEffectController.js # Patient symptoms & doctor sign-off
+│   │   └── dashboardController.js  # Unified metrics & analytics
+│   ├── models/
+│   │   ├── db.js                   # Resilient MySQL connection pool
+│   │   ├── initDb.js               # Auto table & column migrations
+│   │   └── seed.js                 # Realistic seed data
+│   └── routes/                     # RESTful API route endpoints
 ├── frontend/
-│ ├── admin.html
-│ ├── dashboard.html
-│ ├── doctor-panel.html
-│ ├── login.html
-│ ├── medicine_form.html
-│ ├── medicine.html
-│ ├── patient-dashboard.html
-│ ├── pharmahelp.html
-│ ├── register.html
-│ ├── report.html
-│ ├── side-effects-dashboard.html
-│ ├── side-effects.html
-│ ├── upload.html
-│ ├── css/
-│ └── js/
-└── .env.example
+│   ├── src/
+│   │   ├── components/             # Navbar, Footer, CartModal, PrescriptionScannerModal, DrugInteractionCheckerModal, AuthModal
+│   │   ├── context/                # AuthContext, CartContext
+│   │   ├── views/                  # LandingPage, MedicineCatalogView, PatientPortal, PharmacistDashboard, DoctorPanel, AdminDashboard
+│   │   ├── api.js                  # Centralized typed-like API client
+│   │   └── index.css               # Modern healthcare glassmorphism design tokens
+│   ├── public/images/              # High-definition medical AI art assets
+│   ├── vite.config.js              # Vite bundler & backend proxy config
+│   └── package.json
+└── uploads/                        # Prescription files storage & images
 ```
-
-## Installation & Setup
-
-### 1. Clone the Repository
-
-```sh
-git clone https://github.com/yourusername/pharmahelp.git
-cd pharmahelp
-```
-
-### 2. Backend Setup
-
-- Install dependencies:
-
-```sh
-cd backend
-npm install
-```
-
-- Create a `.env` file in the root with your database and email credentials (see `.env.example`):
-
-```
-DB_HOST=localhost
-DB_USER=your_mysql_user
-DB_PASSWORD=your_mysql_password
-DB_NAME=pharmacy
-JWT_SECRET=your_jwt_secret
-EMAIL_USER=your_email@example.com
-EMAIL_PASS=your_email_password
-```
-
-- Start MySQL and create the database:
-
-```sql
-CREATE DATABASE pharmacy;
-```
-
-- Start the backend server:
-
-```sh
-node server.js
-```
-
-### 3. Frontend Setup
-
-- No build step required. All HTML/CSS/JS files are ready to use.
-- You can serve them using [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) in VS Code or deploy as static files.
-
-### 4. Usage
-
-- Open `frontend/pharmahelp.html` in your browser to access the homepage.
-- Use the navigation to access login, register, dashboards, and other features.
-- Backend API runs on `http://localhost:5000` by default.
-
-### 5. Deployment
-
-- **Frontend:** Deploy `frontend/` folder to Netlify, Vercel, or any static hosting.
-- **Backend:** Deploy `backend/` folder to Render, Heroku, or similar Node.js hosting.
-- Update frontend JS API URLs to point to your live backend.
-
-### 6. Environment & Security
-
-- **Do NOT commit your `.env` file**. Use `.env.example` for sharing config structure.
-- **Do NOT commit `node_modules`**. It is ignored by default.
-
-## Contributing
-
-1. Fork the repo
-2. Create your feature branch (`git checkout -b feature/YourFeature`)
-3. Commit your changes (`git commit -am 'Add new feature'`)
-4. Push to the branch (`git push origin feature/YourFeature`)
-5. Create a Pull Request
-
-## License
-
-MIT
 
 ---
 
-**For any issues or questions, open an issue or contact
+## ⚡ Quick Start Guide
+
+### 1. Database Configuration
+Ensure MySQL is running with database `pharmacy`:
+```sql
+CREATE DATABASE pharmacy;
+```
+Configure your `.env` in the project root:
+```env
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=root
+DB_NAME=pharmacy
+PORT=5000
+JWT_SECRET=pharmahelp_super_secret_jwt_key_2025
+```
+
+### 2. Start Backend Server
+```sh
+cd backend
+node server.js
+```
+The backend automatically verifies database tables, executes schema upgrades, seeds sample records if empty, and serves the application at **`http://localhost:5000`**.
+
+### 3. Frontend Development Server (Optional)
+If you want hot-module-reloading during frontend development:
+```sh
+cd frontend
+npm install
+npm run dev
+```
+Accessible at **`http://localhost:5173`** (proxies `/api` and `/uploads` directly to port 5000).
+
+---
+
+## 🩺 Demo Test Accounts
+
+You can use the **1-Click Role Switcher** in the top navigation bar or log in with credentials:
+
+| Role | Name | Email |
+| :--- | :--- | :--- |
+| **Patient** | Angshuman Roy | `angshumanroy200@gmail.com` |
+| **Doctor** | Dr. Alice Grey, MD | `alice200@gmail.com` |
+| **Pharmacist** | Ping (Lead Pharmacist) | `ping24@gmail.com` |
+| **System Admin** | Pawan (Admin) | `pawan2004@gmail.com` |
+
+---
+
+## 📄 License
+MIT License. Crafted for next-generation digital healthcare.
