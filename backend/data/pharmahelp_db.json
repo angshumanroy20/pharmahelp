@@ -27,6 +27,16 @@
       "email": "alice200@gmail.com",
       "password": "$2b$10$OYb7GsHBSo/LY1UFa00sQ.OyJQmgayCV0Li/yuuYLyZcoAmD372ne",
       "role": "doctor"
+    },
+    {
+      "id": 5,
+      "name": "Dr. Alice Grey, MD",
+      "email": "doctor.demo@pharmahelp.com",
+      "password": "$2b$10$RsYwkZTZale57ABBh.k6heaPGqB2APzwndVwPvh0AzvDTQeCfqZ2G",
+      "role": "doctor",
+      "created_at": "2026-10-04T13:37:16.631Z",
+      "uploaded_at": "2026-10-04T13:37:16.631Z",
+      "date_reported": "2026-10-04"
     }
   ],
   "medicines": [
