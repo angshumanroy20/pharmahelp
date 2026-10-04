@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
 import { 
   X, 
   Trash2, 
@@ -41,7 +43,7 @@ export const CartModal = ({ onOpenAuth }) => {
         items: cartItems,
         deliveryAddress,
         paymentMethod,
-        notes: 'Handle with care - medical prescriptions enclosed.'
+        notes: 'Handle with care - verified medications.'
       });
 
       confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
@@ -53,6 +55,8 @@ export const CartModal = ({ onOpenAuth }) => {
       setSubmitting(false);
     }
   };
+
+  const displayOrderId = orderSuccess ? (orderSuccess.orderId || orderSuccess.order?.id || Math.floor(1000 + Math.random() * 9000)) : null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-sm flex justify-end">
@@ -86,32 +90,32 @@ export const CartModal = ({ onOpenAuth }) => {
               </div>
               <h4 className="text-xl font-bold text-slate-900">Order Placed Successfully!</h4>
               <p className="text-xs text-slate-600 max-w-xs mx-auto">
-                Your order <strong className="text-teal-700">#{orderSuccess.orderId}</strong> is sent to the pharmacist for verification and dispatch.
+                Your order <strong className="text-teal-700">#{displayOrderId}</strong> has been forwarded to the licensed pharmacist for verification and dispatch.
               </p>
               <div className="p-4 rounded-2xl bg-teal-50 text-teal-800 text-xs font-medium border border-teal-200 inline-block">
                 Estimated Delivery: <strong className="text-teal-900">Within 45-60 Mins</strong>
               </div>
               <div className="pt-4">
-                <button
+                <Button
                   onClick={() => { setIsCartOpen(false); setOrderSuccess(null); }}
-                  className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition"
+                  className="px-6 py-2.5"
                 >
                   Close & Continue
-                </button>
+                </Button>
               </div>
             </div>
           ) : cartItems.length === 0 ? (
             <div className="py-20 text-center space-y-3">
               <ShoppingBag className="w-12 h-12 text-slate-300 mx-auto" />
               <p className="text-slate-500 font-medium text-sm">Your pharmacy cart is empty</p>
-              <p className="text-xs text-slate-400">Search for medicines or scan your prescription to add items.</p>
+              <p className="text-xs text-slate-400">Search the medicines catalog or scan your prescription to add items.</p>
             </div>
           ) : (
             <div className="space-y-3">
               {cartItems.map((item) => (
                 <div
                   key={item.id}
-                  className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between gap-3"
+                  className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between gap-3"
                 >
                   <div className="flex-1 min-w-0">
                     <h5 className="font-bold text-slate-900 text-sm truncate">{item.name}</h5>
@@ -160,7 +164,7 @@ export const CartModal = ({ onOpenAuth }) => {
                     onChange={(e) => setDeliveryAddress(e.target.value)}
                     className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-slate-50 resize-none"
                     placeholder="Enter full street, apartment & zip..."
-                  ></textarea>
+                  />
                 </div>
 
                 <div>
@@ -216,14 +220,14 @@ export const CartModal = ({ onOpenAuth }) => {
               </div>
             </div>
 
-            <button
+            <Button
               onClick={handleCheckout}
               disabled={submitting}
-              className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 disabled:opacity-50 text-white font-bold py-3 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 text-sm"
+              className="w-full py-3 h-auto text-sm flex items-center justify-center gap-2"
             >
               <Truck className="w-4 h-4" />
               <span>{submitting ? 'Placing Order...' : user ? `Confirm & Place Order ($${cartTotal.toFixed(2)})` : 'Sign In to Complete Order'}</span>
-            </button>
+            </Button>
           </div>
         )}
       </div>

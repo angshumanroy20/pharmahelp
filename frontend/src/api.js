@@ -314,18 +314,20 @@ export const api = {
     } catch (e) {}
 
     const orders = getLocal('orders', []);
+    const items = orderData.items || [];
+    const calculatedTotal = items.reduce((sum, item) => sum + ((parseFloat(item.price) || 0) * (parseInt(item.quantity) || 1)), 0);
     const newOrder = {
       id: Math.floor(1000 + Math.random() * 9000),
-      items: orderData.items,
-      total_amount: orderData.total_amount,
-      delivery_address: orderData.delivery_address,
-      payment_method: orderData.payment_method || 'Cash on Delivery',
+      items: items,
+      total_amount: orderData.total_amount || calculatedTotal.toFixed(2),
+      delivery_address: orderData.delivery_address || orderData.deliveryAddress || 'Standard Delivery Address',
+      payment_method: orderData.payment_method || orderData.paymentMethod || 'Cash on Delivery',
       status: 'processing',
       created_at: new Date().toISOString()
     };
     orders.unshift(newOrder);
     setLocal('orders', orders);
-    return { message: 'Order created successfully', order: newOrder };
+    return { message: 'Order created successfully', order: newOrder, orderId: newOrder.id };
   },
 
   getMyOrders: async () => {
@@ -645,8 +647,13 @@ export const api = {
     }
 
     const safetyScore = interactions.length === 0 ? 98 : Math.max(40, 95 - (interactions.length * 25));
+    const summary = interactions.length === 0 
+      ? 'No known critical interactions between selected medications'
+      : `${interactions.length} potential interaction(s) detected requiring caution`;
+
     return {
       safetyScore,
+      summary,
       totalInteractions: interactions.length,
       analyzedMedicines: medicines,
       interactions
@@ -665,13 +672,14 @@ export const api = {
     } catch (e) {}
 
     // Simulated high-fidelity OCR parser
-    return {
-      success: true,
-      confidence: 96.4,
-      patient_name: "Angshuman Roy",
-      doctor_name: "Dr. Alice Grey, MD (Reg #MED-94021)",
-      date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
-      detected_medications: [
+    const scanData = {
+      scanId: "RX-SCAN-9412",
+      confidence: "96.4%",
+      clinicalDiagnosis: "Acute upper respiratory tract infection with mild pyrexia",
+      extractedDoctor: "Dr. Alice Grey, MD (Reg #MED-94021)",
+      extractedPatient: "Angshuman Roy",
+      detectedDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+      prescribedMedicines: [
         {
           name: "Paracetamol 650mg",
           dosage: "1 tablet after meals",
@@ -697,10 +705,16 @@ export const api = {
           quantity: 1
         }
       ],
-      clinical_warnings: [
-        "Complete full 7-day course of Amoxicillin even if symptomatic relief occurs earlier.",
+      clinicalWarnings: [
+        "Complete full 7-day course of Amoxicillin even if symptoms abate earlier.",
         "Take Paracetamol with adequate hydration."
       ]
+    };
+
+    return {
+      success: true,
+      data: scanData,
+      ...scanData
     };
   },
 

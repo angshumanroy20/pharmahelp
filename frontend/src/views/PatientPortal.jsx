@@ -68,14 +68,27 @@ export const PatientPortal = ({ onOpenScanner }) => {
         api.getDoctors().catch(() => ({ doctors: [] })),
       ]);
 
-      setPrescriptions(pRes.prescriptions || []);
-      setReminders(rRes.reminders || []);
-      setAppointments(aRes.appointments || []);
-      setSideEffects(sRes.reports?.filter((r) => r.patient_id === user?.id) || sRes.reports || []);
-      setOrders(oRes.orders || []);
-      setDoctors(dRes.doctors || []);
-      if (dRes.doctors?.length > 0 && !selectedDoctorId) {
-        setSelectedDoctorId(dRes.doctors[0].id);
+      const normalize = (val, key) => {
+        if (Array.isArray(val)) return val;
+        if (val && Array.isArray(val[key])) return val[key];
+        return [];
+      };
+
+      const normP = normalize(pRes, 'prescriptions');
+      const normR = normalize(rRes, 'reminders');
+      const normA = normalize(aRes, 'appointments');
+      const normS = normalize(sRes, 'reports');
+      const normO = normalize(oRes, 'orders');
+      const normD = normalize(dRes, 'doctors');
+
+      setPrescriptions(normP);
+      setReminders(normR);
+      setAppointments(normA);
+      setSideEffects(normS);
+      setOrders(normO);
+      setDoctors(normD);
+      if (normD.length > 0 && !selectedDoctorId) {
+        setSelectedDoctorId(normD[0].id);
       }
     } catch (err) {
       console.error('Failed to load patient portal data:', err);

@@ -27,6 +27,7 @@ export const App = () => {
       return (
         <AdminDashboard 
           onBackToHome={() => setActiveTab('home')} 
+          onOpenAuth={() => setIsAuthOpen(true)}
         />
       );
     }
@@ -42,16 +43,16 @@ export const App = () => {
     if (activeTab === 'portal') {
       if (!user) {
         return (
-          <div className="max-w-md mx-auto my-20 p-8 glass-card rounded-3xl text-center space-y-4">
-            <h3 className="text-xl font-bold text-slate-900">Sign In Required</h3>
-            <p className="text-xs text-slate-500">
-              Please sign in or use a 1-click demo account to access your role-specific healthcare dashboard.
+          <div className="max-w-md mx-auto my-20 p-8 bg-white border border-slate-200 rounded-2xl text-center space-y-4 shadow-sm">
+            <h3 className="text-xl font-bold text-slate-900">Account Access Required</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Please sign in with your account to access your role-specific healthcare records, prescriptions, and orders.
             </p>
             <button
               onClick={() => setIsAuthOpen(true)}
-              className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 px-6 rounded-xl text-xs transition"
+              className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 px-6 rounded-xl text-xs transition shadow-xs"
             >
-              Open Sign In
+              Sign In or Register
             </button>
           </div>
         );
@@ -67,7 +68,12 @@ export const App = () => {
         case 'pharmacist':
           return <PharmacistDashboard />;
         case 'admin':
-          return <AdminDashboard />;
+          return (
+            <AdminDashboard 
+              onBackToHome={() => setActiveTab('home')} 
+              onOpenAuth={() => setIsAuthOpen(true)}
+            />
+          );
         default:
           return (
             <PatientPortal 
