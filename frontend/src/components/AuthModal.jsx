@@ -186,18 +186,18 @@ export const AuthModal = ({ isOpen, onClose }) => {
 
           {isRegister && (
             <div>
-              <label className="block text-xs font-bold text-slate-600 mb-1">Account Role</label>
+              <label className="block text-xs font-bold text-slate-600 mb-1">Select Account Role</label>
               <div className="relative">
                 <Shield className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm bg-white"
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-xs font-semibold bg-white"
                 >
-                  <option value="patient">Patient</option>
-                  <option value="doctor">Doctor</option>
-                  <option value="pharmacist">Pharmacist</option>
-                  <option value="admin">System Admin</option>
+                  <option value="patient">👤 Patient (Order Medicines & Prescriptions)</option>
+                  <option value="doctor">🩺 Doctor (Teleconsultations & Clinical Sign-off)</option>
+                  <option value="pharmacist">💊 Pharmacist (Inventory & Prescription Verification)</option>
+                  <option value="admin">🛡️ System Admin (Full Governance & Security Control)</option>
                 </select>
               </div>
             </div>
@@ -212,17 +212,32 @@ export const AuthModal = ({ isOpen, onClose }) => {
           </button>
         </form>
 
-        {/* Toggle Login/Register */}
-        <div className="text-center mt-4">
+        {/* Direct Separate System Admin Console Access */}
+        <div className="mt-4 pt-3 border-t border-slate-100 space-y-2.5">
           <button
             type="button"
-            onClick={() => { setIsRegister(!isRegister); setError(null); }}
-            className="text-xs font-bold text-teal-700 hover:underline"
+            onClick={() => {
+              enterAdminMode();
+              onClose();
+            }}
+            className="w-full py-2.5 px-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm"
           >
-            {isRegister
-              ? 'Already registered? Sign In'
-              : "Don't have an account yet? Register here"}
+            <Shield className="w-4 h-4 text-purple-700" />
+            <span>Direct System Admin Console Access (Master Mode)</span>
           </button>
+
+          {/* Toggle Login/Register */}
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => { setIsRegister(!isRegister); setError(null); }}
+              className="text-xs font-bold text-teal-700 hover:underline"
+            >
+              {isRegister
+                ? 'Already registered? Sign In'
+                : "Don't have an account yet? Register with custom role"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
