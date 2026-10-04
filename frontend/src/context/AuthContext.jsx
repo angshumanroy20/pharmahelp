@@ -18,15 +18,12 @@ export const AuthProvider = ({ children }) => {
         try {
           setUser(JSON.parse(storedUser));
           setToken(storedToken);
-          // Refresh user data from server in background
           api.getMe().then((res) => {
             if (res.user) {
               setUser(res.user);
               localStorage.setItem('user', JSON.stringify(res.user));
             }
-          }).catch(() => {
-            // Token might be invalid
-          });
+          }).catch(() => {});
         } catch (e) {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
@@ -48,53 +45,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
-    return await api.register(userData);
-  };
-
-  const demoLogin = async (role) => {
-    try {
-      const res = await api.demoLogin(role);
-      if (res && res.token && res.user) {
-        setToken(res.token);
-        setUser(res.user);
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('user', JSON.stringify(res.user));
-        return res.user;
-      }
-      throw new Error('Incomplete response');
-    } catch (err) {
-      console.warn('Backend demoLogin unavailable, using instant demo fallback:', err.message);
-      // Deterministic demo accounts if backend is spinning up or offline
-      const demoRoles = {
-        patient: { id: 1, name: 'Patient (Guest)', email: 'patient.demo@pharmahelp.com', role: 'patient' },
-        doctor: { id: 2, name: 'Dr. Alice Grey, MD', email: 'doctor.demo@pharmahelp.com', role: 'doctor' },
-        pharmacist: { id: 3, name: 'Ping (Lead Pharmacist)', email: 'pharmacist.demo@pharmahelp.com', role: 'pharmacist' },
-        admin: { id: 9999, name: 'System Administrator', email: 'admin@system.pharmahelp', role: 'admin' },
-      };
-      const fallbackUser = demoRoles[role] || demoRoles.patient;
-      const fallbackToken = 'demo-token-' + btoa(JSON.stringify(fallbackUser));
-
-      setToken(fallbackToken);
-      setUser(fallbackUser);
-      localStorage.setItem('token', fallbackToken);
-      localStorage.setItem('user', JSON.stringify(fallbackUser));
-      return fallbackUser;
-    }
-  };
-
-  const enterAdminMode = () => {
-    const adminUser = {
-      id: 9999,
-      name: 'System Administrator',
-      email: 'admin@system.pharmahelp',
-      role: 'admin'
-    };
-    const adminToken = 'master-admin-token';
-    setToken(adminToken);
-    setUser(adminUser);
-    localStorage.setItem('token', adminToken);
-    localStorage.setItem('user', JSON.stringify(adminUser));
-    return adminUser;
+    const res = await api.register(userData);
+    return res;
   };
 
   const logout = () => {
@@ -105,7 +57,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, demoLogin, enterAdminMode, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { X, Lock, Mail, User, Shield, AlertCircle, Sparkles } from 'lucide-react';
+import { api } from '../api';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Badge } from './ui/badge';
+import { X, Lock, Mail, User, Shield, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export const AuthModal = ({ isOpen, onClose }) => {
-  const { login, register, demoLogin, enterAdminMode } = useAuth();
+  const { login, register } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
+  const [hasAdmin, setHasAdmin] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,6 +18,20 @@ export const AuthModal = ({ isOpen, onClose }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
+
+  // Check admin availability whenever modal is opened
+  useEffect(() => {
+    if (isOpen) {
+      api.getAdminStatus().then(res => {
+        setHasAdmin(!!res?.hasAdmin);
+        // Default role to patient, or admin if first time and register
+        if (!res?.hasAdmin && isRegister) {
+          setFormData(prev => ({ ...prev, role: 'admin' }));
+        }
+      }).catch(() => {});
+    }
+  }, [isOpen, isRegister]);
 
   if (!isOpen) return null;
 
@@ -20,16 +39,24 @@ export const AuthModal = ({ isOpen, onClose }) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMsg(null);
 
     try {
       if (isRegister) {
+        if (formData.role === 'admin' && hasAdmin) {
+          throw new Error('System Admin has already been registered. Only the first registrant can be Admin.');
+        }
+
         await register(formData);
-        alert(`Account created successfully for ${formData.role.toUpperCase()}! Logging in now...`);
-        await login(formData.email, formData.password);
+        setSuccessMsg(`Account created for ${formData.name}! Signing you in...`);
+        setTimeout(async () => {
+          await login(formData.email, formData.password);
+          onClose();
+        }, 800);
       } else {
         await login(formData.email, formData.password);
+        onClose();
       }
-      onClose();
     } catch (err) {
       setError(err.message || 'Operation failed');
     } finally {
@@ -37,95 +64,46 @@ export const AuthModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleQuickDemo = async (role) => {
-    setLoading(true);
-    setError(null);
-    try {
-      if (role === 'admin') {
-        enterAdminMode();
-        onClose();
-        return;
-      }
-      await demoLogin(role);
-      onClose();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-8 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 p-6 sm:p-8 animate-in fade-in zoom-in-95 duration-150">
         
         {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition"
+          aria-label="Close"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center mx-auto mb-3">
-            <Lock className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center mx-auto mb-3">
+            <Lock className="w-6 h-6 text-teal-600" />
           </div>
           <h3 className="text-2xl font-black text-slate-900">
-            {isRegister ? 'Join PharmaHelp' : 'Welcome Back'}
+            {isRegister ? 'Create an Account' : 'Welcome to PharmaHelp'}
           </h3>
           <p className="text-xs text-slate-500 mt-1">
             {isRegister
-              ? 'Create your digital healthcare account in seconds'
-              : 'Sign in to access your prescriptions, records & care'}
+              ? 'Join PharmaHelp for verified prescriptions, orders & telehealth care'
+              : 'Sign in to access your digital healthcare records'}
           </p>
         </div>
 
-        {/* 1-Click Quick Demo Login Row */}
-        <div className="mb-6 p-3 rounded-2xl bg-amber-50/70 border border-amber-200">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span>Instant 1-Click Demo Login:</span>
+        {/* Admin Availability Notice for First-Time Setup */}
+        {isRegister && !hasAdmin && (
+          <div className="mb-4 p-3.5 rounded-xl bg-purple-50/90 border border-purple-200 text-purple-900 text-xs flex items-start gap-2.5">
+            <Shield className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold">Initial Platform Setup</p>
+              <p className="text-[11px] text-purple-700 mt-0.5">
+                No administrator is currently registered. As the first registrant, you can select <strong>System Admin</strong> to manage the entire platform.
+              </p>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-1.5 text-xs font-semibold">
-            <button
-              type="button"
-              onClick={() => handleQuickDemo('patient')}
-              className="py-1.5 px-2 rounded-lg bg-white hover:bg-sky-50 text-slate-700 border border-slate-200 transition text-left"
-            >
-              👤 Patient (Angshuman)
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickDemo('doctor')}
-              className="py-1.5 px-2 rounded-lg bg-white hover:bg-emerald-50 text-slate-700 border border-slate-200 transition text-left"
-            >
-              🩺 Doctor (Dr. Alice)
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickDemo('pharmacist')}
-              className="py-1.5 px-2 rounded-lg bg-white hover:bg-teal-50 text-slate-700 border border-slate-200 transition text-left"
-            >
-              💊 Pharmacist (Ping)
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickDemo('admin')}
-              className="py-1.5 px-2 rounded-lg bg-white hover:bg-purple-50 text-slate-700 border border-slate-200 transition text-left"
-            >
-              🛡️ Admin (Pawan)
-            </button>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="relative flex py-2 items-center mb-4">
-          <div className="flex-grow border-t border-slate-200"></div>
-          <span className="flex-shrink mx-3 text-slate-400 text-xs font-medium uppercase">Or Credentials</span>
-          <div className="flex-grow border-t border-slate-200"></div>
-        </div>
+        )}
 
         {/* Error Alert */}
         {error && (
@@ -135,109 +113,121 @@ export const AuthModal = ({ isOpen, onClose }) => {
           </div>
         )}
 
+        {/* Success Alert */}
+        {successMsg && (
+          <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+        )}
+
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-3.5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {isRegister && (
             <div>
-              <label className="block text-xs font-bold text-slate-600 mb-1">Full Name</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Full Name</label>
               <div className="relative">
-                <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                <input
+                <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                <Input
                   type="text"
                   required
-                  placeholder="e.g. John Doe"
+                  placeholder="e.g. Dr. Alex Morgan or Sarah Smith"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                  className="pl-10"
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 mb-1">Email Address</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Email Address</label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-              <input
+              <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+              <Input
                 type="email"
                 required
                 placeholder="name@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                className="pl-10"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 mb-1">Password</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Password</label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-              <input
+              <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+              <Input
                 type="password"
                 required
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                className="pl-10"
               />
             </div>
           </div>
 
           {isRegister && (
             <div>
-              <label className="block text-xs font-bold text-slate-600 mb-1">Select Account Role</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-slate-700">Account Role</label>
+                {!hasAdmin && (
+                  <Badge variant="purple">Admin Unclaimed</Badge>
+                )}
+              </div>
               <div className="relative">
-                <Shield className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-xs font-semibold bg-white"
+                  className="w-full h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 >
-                  <option value="patient">👤 Patient (Order Medicines & Prescriptions)</option>
-                  <option value="doctor">🩺 Doctor (Teleconsultations & Clinical Sign-off)</option>
-                  <option value="pharmacist">💊 Pharmacist (Inventory & Prescription Verification)</option>
-                  <option value="admin">🛡️ System Admin (Full Governance & Security Control)</option>
+                  <option value="patient">👤 Patient (Order medicines, prescription uploads, alarms)</option>
+                  <option value="doctor">🩺 Doctor (Teleconsultations, clinical notes, sign-offs)</option>
+                  <option value="pharmacist">💊 Pharmacist (Inventory control, stock management, Rx checks)</option>
+                  
+                  {/* Admin role is available ONLY if no admin is registered yet */}
+                  {!hasAdmin ? (
+                    <option value="admin">🛡️ System Admin (Available to 1st registrant only)</option>
+                  ) : (
+                    <option value="admin" disabled>🛡️ System Admin (Claimed - Unavailable)</option>
+                  )}
                 </select>
               </div>
+              <p className="text-[11px] text-slate-400 mt-1">
+                {!hasAdmin 
+                  ? 'System Admin role is available exclusively to the very first user registering on this platform.'
+                  : 'System Admin role has already been claimed by the primary administrator.'}
+              </p>
             </div>
           )}
 
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl shadow-md transition text-sm mt-2"
+            className="w-full h-11 rounded-xl text-sm font-bold mt-2"
           >
-            {loading ? 'Please wait...' : isRegister ? 'Create Account' : 'Sign In'}
-          </button>
+            {loading ? 'Processing...' : isRegister ? 'Register Account' : 'Sign In'}
+          </Button>
         </form>
 
-        {/* Direct Separate System Admin Console Access */}
-        <div className="mt-4 pt-3 border-t border-slate-100 space-y-2.5">
+        {/* Toggle Login/Register */}
+        <div className="text-center mt-5 pt-4 border-t border-slate-100">
           <button
             type="button"
-            onClick={() => {
-              enterAdminMode();
-              onClose();
+            onClick={() => { 
+              setIsRegister(!isRegister); 
+              setError(null); 
+              setSuccessMsg(null); 
             }}
-            className="w-full py-2.5 px-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm"
+            className="text-xs font-bold text-teal-700 hover:text-teal-800 hover:underline"
           >
-            <Shield className="w-4 h-4 text-purple-700" />
-            <span>Direct System Admin Console Access (Master Mode)</span>
+            {isRegister
+              ? 'Already registered? Sign In instead'
+              : "Don't have an account? Register here"}
           </button>
-
-          {/* Toggle Login/Register */}
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => { setIsRegister(!isRegister); setError(null); }}
-              className="text-xs font-bold text-teal-700 hover:underline"
-            >
-              {isRegister
-                ? 'Already registered? Sign In'
-                : "Don't have an account yet? Register with custom role"}
-            </button>
-          </div>
         </div>
       </div>
     </div>
