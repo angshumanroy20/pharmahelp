@@ -29,9 +29,8 @@ export const LandingPage = ({ setActiveTab, onOpenAuth, onOpenScanner, onOpenInt
 
   useEffect(() => {
     api.getMedicines().then(res => {
-      if (Array.isArray(res)) {
-        setFeaturedMeds(res.slice(0, 6));
-      }
+      const list = Array.isArray(res) ? res : (res?.medicines || []);
+      setFeaturedMeds(list.slice(0, 6));
     }).catch(() => {});
   }, []);
 

@@ -43,24 +43,26 @@ export const MedicineCatalogView = ({ onOpenInteractions }) => {
   const fetchMedicines = async () => {
     setLoading(true);
     try {
-      let res = await api.getMedicines({
+      let list = await api.getMedicines({
         category: selectedCategory !== 'All' ? selectedCategory : undefined,
       });
+      list = Array.isArray(list) ? list : (list?.medicines || []);
 
       if (search.trim()) {
-        res = await api.searchMedicines(search.trim());
+        const searched = await api.searchMedicines(search.trim());
+        list = Array.isArray(searched) ? searched : (searched?.medicines || []);
         if (selectedCategory !== 'All') {
-          res = res.filter(m => m.category === selectedCategory);
+          list = list.filter(m => m.category === selectedCategory);
         }
       }
 
       if (prescriptionFilter === 'otc') {
-        res = res.filter(m => !m.requires_prescription || m.requires_prescription === 0);
+        list = list.filter(m => !m.requires_prescription || m.requires_prescription === 0);
       } else if (prescriptionFilter === 'rx') {
-        res = res.filter(m => m.requires_prescription === 1);
+        list = list.filter(m => m.requires_prescription === 1);
       }
 
-      setMedicines(res);
+      setMedicines(list);
     } catch (err) {
       console.error('Error fetching medicines:', err);
     } finally {

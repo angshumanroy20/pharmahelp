@@ -47,8 +47,8 @@ export const AdminDashboard = ({ onBackToHome, onOpenAuth }) => {
       ]);
 
       setStats(sRes);
-      setUsersList(uRes.users || []);
-      setMedicinesList(mRes || []);
+      setUsersList(Array.isArray(uRes) ? uRes : (uRes.users || []));
+      setMedicinesList(Array.isArray(mRes) ? mRes : (mRes.medicines || []));
     } catch (err) {
       console.error('Admin fetch error:', err);
     } finally {
