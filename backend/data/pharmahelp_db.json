@@ -92,7 +92,7 @@
       "stock": 65,
       "substitutes": "Azee 500, Azithral 500, Zithromax",
       "category": "Antibiotics",
-      "price": 22.0,
+      "price": 22,
       "manufacturer": "Cipla Ltd",
       "dosage_form": "Tablet",
       "requires_prescription": 1
@@ -176,7 +176,7 @@
       "stock": 40,
       "substitutes": "Plavix, Deplatt, Clopilet",
       "category": "Cardiovascular & Blood Pressure",
-      "price": 28.0,
+      "price": 28,
       "manufacturer": "Sanofi India",
       "dosage_form": "Tablet",
       "requires_prescription": 1
@@ -224,7 +224,7 @@
       "stock": 50,
       "substitutes": "Januvia 50, Istavel 50",
       "category": "Diabetes Care",
-      "price": 32.0,
+      "price": 32,
       "manufacturer": "MSD Pharmaceuticals",
       "dosage_form": "Tablet",
       "requires_prescription": 1
@@ -272,7 +272,7 @@
       "stock": 80,
       "substitutes": "Digene Gel, Gelusil Liquid",
       "category": "Gastrointestinal",
-      "price": 12.0,
+      "price": 12,
       "manufacturer": "Abbott Healthcare",
       "dosage_form": "Liquid Suspension",
       "requires_prescription": 0
@@ -320,7 +320,7 @@
       "stock": 35,
       "substitutes": "Flomist, Flonase, Flohale",
       "category": "Respiratory & Allergy",
-      "price": 23.0,
+      "price": 23,
       "manufacturer": "Cipla Ltd",
       "dosage_form": "Nasal Spray (120 Metred Sprays)",
       "requires_prescription": 1
@@ -332,7 +332,7 @@
       "stock": 90,
       "substitutes": "Calcirol Sachet, Uprise-D3, D-Rise 60k",
       "category": "Vitamins & Supplements",
-      "price": 16.0,
+      "price": 16,
       "manufacturer": "Cadila Healthcare",
       "dosage_form": "Softgel Capsule",
       "requires_prescription": 0
@@ -356,7 +356,7 @@
       "stock": 70,
       "substitutes": "Neurobion Forte, Nurokind-Plus, Cobadex",
       "category": "Vitamins & Supplements",
-      "price": 21.0,
+      "price": 21,
       "manufacturer": "Mankind Pharma",
       "dosage_form": "Capsule",
       "requires_prescription": 0
@@ -368,7 +368,7 @@
       "stock": 85,
       "substitutes": "Shelcal 500, Cipcal 500, Gemcal",
       "category": "Vitamins & Supplements",
-      "price": 11.0,
+      "price": 11,
       "manufacturer": "Torrent Pharmaceuticals",
       "dosage_form": "Tablet",
       "requires_prescription": 0
